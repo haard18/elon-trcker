@@ -89,3 +89,32 @@ export interface TweetTypesResponse {
   percentages: TweetTypePercentages;
   breakdown: TweetTypeBreakdown[];
 }
+
+export interface EngagementMetrics {
+  averageTweetsPerDay: number;
+  totalTweetsAllTime: number;
+  daysWithTweets: number;
+  totalDaysTracked: number;
+  consistencyScore: number; // 0-100 percentage
+  mostActiveDayOfWeek: string;
+  mostActiveHour: string;
+  tweetingFrequency: 'sparse' | 'moderate' | 'frequent' | 'very_frequent';
+}
+
+export interface EngagementMetricsResponse extends EngagementMetrics {
+  lastCalculated: string;
+}
+
+export interface VelocityMetric {
+  period: string; // 'today', '7days', '30days'
+  tweetsPerHour: number;
+  tweetsPerDay: number;
+  trend: 'increasing' | 'stable' | 'decreasing';
+  trendPercentage: number;
+}
+
+export interface VelocityResponse {
+  today: VelocityMetric;
+  sevenDays: VelocityMetric;
+  thirtyDays: VelocityMetric;
+}

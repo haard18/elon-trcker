@@ -7,6 +7,8 @@ import WeekChart from '@/components/WeekChart';
 import HourlyHeatmap from '@/components/HourlyHeatmap';
 import WeekdayDistribution from '@/components/WeekdayDistribution';
 import TypeBreakdown from '@/components/TypeBreakdown';
+import EngagementMetrics from '@/components/EngagementMetrics';
+import VelocityMetrics from '@/components/VelocityMetrics';
 import {
   DayStats,
   TodayStats,
@@ -14,6 +16,8 @@ import {
   HourlyStatsResponse,
   WeekdayStatsResponse,
   TweetTypesResponse,
+  EngagementMetricsResponse,
+  VelocityResponse,
 } from '@/lib/types';
 
 interface MonthStatsResponse extends MonthStats {
@@ -31,28 +35,34 @@ export default function Dashboard() {
   const [hourlyStats, setHourlyStats] = useState<HourlyStatsResponse | null>(null);
   const [weekdayStats, setWeekdayStats] = useState<WeekdayStatsResponse | null>(null);
   const [typeStats, setTypeStats] = useState<TweetTypesResponse | null>(null);
+  const [engagementStats, setEngagementStats] = useState<EngagementMetricsResponse | null>(null);
+  const [velocityStats, setVelocityStats] = useState<VelocityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchStats = useCallback(async () => {
     try {
-      const [todayRes, weekRes, monthRes, hourlyRes, weekdayRes, typeRes] = await Promise.all([
+      const [todayRes, weekRes, monthRes, hourlyRes, weekdayRes, typeRes, engagementRes, velocityRes] = await Promise.all([
         fetch('/api/stats/today'),
         fetch('/api/stats/7days'),
         fetch('/api/stats/month'),
         fetch('/api/stats/hourly'),
         fetch('/api/stats/weekday'),
         fetch('/api/stats/types'),
+        fetch('/api/stats/engagement'),
+        fetch('/api/stats/velocity'),
       ]);
 
-      const [today, week, month, hourly, weekday, type] = await Promise.all([
+      const [today, week, month, hourly, weekday, type, engagement, velocity] = await Promise.all([
         todayRes.json(),
         weekRes.json(),
         monthRes.json(),
         hourlyRes.json(),
         weekdayRes.json(),
         typeRes.json(),
+        engagementRes.json(),
+        velocityRes.json(),
       ]);
 
       setTodayStats(today);
@@ -61,6 +71,8 @@ export default function Dashboard() {
       setHourlyStats(hourly);
       setWeekdayStats(weekday);
       setTypeStats(type);
+      setEngagementStats(engagement);
+      setVelocityStats(velocity);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -206,6 +218,20 @@ export default function Dashboard() {
       <section className="mb-12">
         <h2 className="mb-6 text-2xl font-black text-white uppercase tracking-tight">Advanced Analytics</h2>
         <div className="space-y-6">
+          {/* Engagement Metrics */}
+          {engagementStats && (
+            <Card title="Engagement & Consistency Metrics">
+              <EngagementMetrics data={engagementStats} />
+            </Card>
+          )}
+
+          {/* Velocity/Momentum */}
+          {velocityStats && (
+            <Card title="Posting Velocity & Trends">
+              <VelocityMetrics data={velocityStats} />
+            </Card>
+          )}
+
           {/* Hourly Heatmap */}
           {hourlyStats && (
             <Card title="Time-of-Day Heatmap (24H)">

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { HourlyStats } from '@/lib/types';
 
 interface HourlyHeatmapProps {
@@ -39,18 +40,31 @@ export default function HourlyHeatmap({ data, maxCount, peakHours }: HourlyHeatm
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-6 gap-1 md:grid-cols-12">
-        {data.map((hour) => (
-          <div
+      <motion.div
+        className="grid grid-cols-6 gap-1 md:grid-cols-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.02, delayChildren: 0.1 }}
+      >
+        {data.map((hour, index) => (
+          <motion.div
             key={hour.hour}
             className={`flex flex-col items-center justify-center rounded-sm p-2 transition-all ${getBackgroundColor(hour.count, hour.hour)}`}
             title={`${String(hour.hour).padStart(2, '0')}:00 - ${hour.count} tweet${hour.count !== 1 ? 's' : ''}`}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.3,
+              delay: index * 0.02,
+              ease: 'easeOut',
+            }}
+            whileHover={{ scale: 1.15, zIndex: 10 }}
           >
             <div className={`text-xs font-bold ${getTextColor(hour.count)}`}>{String(hour.hour).padStart(2, '0')}:00</div>
             <div className={`text-xs font-bold ${getTextColor(hour.count)}`}>{hour.count}</div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Legend */}
       <div className="border-t-2 border-gray-300 pt-4">
