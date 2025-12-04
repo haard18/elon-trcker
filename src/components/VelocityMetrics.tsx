@@ -106,14 +106,14 @@ export default function VelocityMetrics({ data }: VelocityMetricsProps) {
         >
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-xs font-bold uppercase text-gray-600">Today</div>
+              <div className="text-xs font-bold uppercase text-black">Today</div>
               <div className="mt-3 space-y-2">
                 <div>
-                  <span className="text-sm font-bold text-gray-600">Per Day: </span>
+                  <span className="text-sm font-bold text-black">Per Day: </span>
                   <span className="text-2xl font-black text-black">{data.today.tweetsPerDay}</span>
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-gray-600">Per Hour: </span>
+                  <span className="text-sm font-bold text-black">Per Hour: </span>
                   <span className="text-lg font-black text-black">{data.today.tweetsPerHour}</span>
                 </div>
               </div>
@@ -129,16 +129,16 @@ export default function VelocityMetrics({ data }: VelocityMetricsProps) {
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="text-xs font-bold uppercase text-gray-600">7 Days Average</div>
+              <div className="text-xs font-bold uppercase text-black">7 Days Average</div>
               <div className="mt-3 space-y-2">
                 <div>
-                  <span className="text-sm font-bold text-gray-600">Per Day: </span>
+                  <span className="text-sm font-bold text-black">Per Day: </span>
                   <span className="text-2xl font-black text-black">
                     {Math.round(data.sevenDays.tweetsPerDay * 100) / 100}
                   </span>
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-gray-600">Per Hour: </span>
+                  <span className="text-sm font-bold text-black">Per Hour: </span>
                   <span className="text-lg font-black text-black">
                     {Math.round(data.sevenDays.tweetsPerHour * 100) / 100}
                   </span>
@@ -148,7 +148,7 @@ export default function VelocityMetrics({ data }: VelocityMetricsProps) {
  
           </div>
           {data.sevenDays.trendPercentage > 0 && (
-            <div className="mt-3 border-t-2 border-gray-200 pt-3 text-xs font-bold text-gray-600">
+            <div className="mt-3 border-t-2 border-gray-200 pt-3 text-xs font-bold text-black">
               {data.sevenDays.trend === 'increasing' ? '↑' : '↓'}{' '}
               {data.sevenDays.trendPercentage}% vs 30-day avg
             </div>
@@ -163,16 +163,16 @@ export default function VelocityMetrics({ data }: VelocityMetricsProps) {
         >
           <div className="flex items-start justify-between">
             <div>
-              <div className="text-xs font-bold uppercase text-gray-600">30 Days Average</div>
+              <div className="text-xs font-bold uppercase text-black">30 Days Average</div>
               <div className="mt-3 space-y-2">
                 <div>
-                  <span className="text-sm font-bold text-gray-600">Per Day: </span>
+                  <span className="text-sm font-bold text-black">Per Day: </span>
                   <span className="text-2xl font-black text-black">
                     {Math.round(data.thirtyDays.tweetsPerDay * 100) / 100}
                   </span>
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-gray-600">Per Hour: </span>
+                  <span className="text-sm font-bold text-black">Per Hour: </span>
                   <span className="text-lg font-black text-black">
                     {Math.round(data.thirtyDays.tweetsPerHour * 100) / 100}
                   </span>
