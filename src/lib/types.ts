@@ -33,3 +33,59 @@ export interface MonthStats {
   zeroTweetDays: number;
   tweetsPerDay: DayStats[];
 }
+
+export interface HourlyStats {
+  hour: number;
+  count: number;
+}
+
+export interface HourlyStatsResponse {
+  hourly: HourlyStats[];
+  peakHours: number[];
+  silentHours: number[];
+  maxCount: number;
+  totalTweets: number;
+}
+
+export interface WeekdayStats {
+  weekday: number;
+  count: number;
+  average: number;
+}
+
+export interface WeekdayStatsResponse {
+  weekSummary: WeekdayStats[];
+  topDay: number;
+  topDayName: string;
+  totalTweets: number;
+  averagePerDay: number;
+}
+
+export interface TweetTypeStats {
+  text: number;
+  replies: number;
+  quotes: number;
+  retweets: number;
+  media: number;
+  total: number;
+}
+
+export interface TweetTypePercentages {
+  textPct: number;
+  repliesPct: number;
+  quotesPct: number;
+  retweetsPct: number;
+  mediaPct: number;
+}
+
+export interface TweetTypeBreakdown {
+  type: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TweetTypesResponse {
+  counts: TweetTypeStats;
+  percentages: TweetTypePercentages;
+  breakdown: TweetTypeBreakdown[];
+}
