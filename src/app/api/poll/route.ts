@@ -7,6 +7,9 @@ interface TweetDocument {
   _id: string;
   text: string;
   created_at: Date;
+  isRetweet?: boolean;
+  isQuote?: boolean;
+  isReply?: boolean;
 }
 
 interface TwitterApiResponse {
@@ -70,19 +73,32 @@ export async function GET() {
     const db = collection.db;
     const pollStateCollection = db.collection<PollStateDocument>('poll_state');
 
-    // Get last poll time
+    // Get last poll time and check if this is first poll
     const pollState = await pollStateCollection.findOne({ _id: 'last_poll' });
     const lastPollTime = pollState?.lastPollTime;
+    const isFirstPoll = !lastPollTime;
 
     console.log('Last poll time:', lastPollTime);
+    console.log('Is first poll (initial backfill):', isFirstPoll);
 
     // Fetch all tweets with pagination
     let allTweets: TwitterApiTweet[] = [];
     let nextCursor: string | undefined = undefined;
     let pagesProcessed = 0;
-    const maxPages = 10; // Prevent infinite loops
+    // On first poll, fetch all pages until month start or no more data
+    // On subsequent polls, fetch until time boundary crossed
+    const maxPages = isFirstPoll ? 1000 : 5; // First poll: fetch all available, subsequent: up to 100
+    let oldestTweetTime: Date | null = null; // Track oldest tweet found
 
-    console.log('Starting to fetch tweets with pagination...');
+    // On first poll, calculate the start of current month for cutoff
+    let monthStartDate: Date | null = null;
+    if (isFirstPoll) {
+      const now = new Date();
+      monthStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+      console.log('First poll - will fetch until month start:', monthStartDate.toISOString());
+    }
+
+    console.log('Starting to fetch tweets with pagination... (maxPages=' + maxPages + ')');
 
     do {
       const currentParams = new URLSearchParams(params);
@@ -141,30 +157,68 @@ export async function GET() {
 
       const pageTweets = data.data.tweets;
       
-      // Filter tweets newer than last poll if we have a last poll time
-      const newTweets = lastPollTime
-        ? pageTweets.filter(tweet => new Date(tweet.createdAt) > lastPollTime)
-        : pageTweets;
-
-      allTweets.push(...newTweets);
-      console.log(`Added ${newTweets.length} new tweets from this page (${pageTweets.length} total in page)`);
-
-      // If we found tweets older than our last poll, we can stop
-      if (lastPollTime && newTweets.length < pageTweets.length) {
-        console.log('Reached tweets older than last poll, stopping pagination');
-        break;
+      // On first poll, accept all tweets (initial backfill). On subsequent polls, only accept tweets newer than last poll
+      let newTweets = pageTweets;
+      if (lastPollTime) {
+        newTweets = pageTweets.filter(tweet => new Date(tweet.createdAt) > lastPollTime);
       }
 
-      // Check pagination
-      if (data.has_next_page && data.next_cursor && allTweets.length < maxTweetsPerPoll) {
+      // Track the oldest tweet we've seen
+      if (pageTweets.length > 0) {
+        const pageOldestTime = new Date(pageTweets[pageTweets.length - 1].createdAt);
+        if (!oldestTweetTime || pageOldestTime < oldestTweetTime) {
+          oldestTweetTime = pageOldestTime;
+        }
+      }
+
+      allTweets.push(...newTweets);
+      console.log(`Added ${newTweets.length} new tweets from this page (${pageTweets.length} total in page), oldest in page: ${pageTweets[pageTweets.length - 1]?.createdAt}`);
+
+      // Check if we've reached month start (for first poll backfill)
+      let reachedMonthStart = false;
+      if (isFirstPoll && monthStartDate && oldestTweetTime) {
+        reachedMonthStart = oldestTweetTime < monthStartDate;
+        if (reachedMonthStart) {
+          console.log('Reached month start boundary, stopping pagination');
+        }
+      }
+
+      // Stop pagination if:
+      // 1. No more pages available, OR
+      // 2. We've hit the max pages limit, OR
+      // 3. (First poll) We've reached the month start, OR
+      // 4. (Subsequent polls) We're past the poll time boundary (found tweets older than last poll)
+      if (!data.has_next_page || !data.next_cursor) {
+        console.log('No more pages available, stopping pagination');
+        nextCursor = undefined;
+      } else if (pagesProcessed >= maxPages - 1) {
+        console.log('Reached max pages limit, stopping pagination');
+        nextCursor = undefined;
+      } else if (isFirstPoll && reachedMonthStart) {
+        console.log('Reached month start, stopping pagination');
+        nextCursor = undefined;
+      } else if (!isFirstPoll && lastPollTime && newTweets.length === 0 && pageTweets.length > 0) {
+        // Only for subsequent polls: if we got tweets but none were newer than lastPollTime, we've crossed the time boundary
+        console.log('Crossed poll time boundary - all tweets on this page are older than last poll, stopping pagination');
+        nextCursor = undefined;
+      } else {
+        // Continue to next page
         nextCursor = data.next_cursor;
         pagesProcessed++;
-      } else {
-        nextCursor = undefined;
+        console.log('More pages available, continuing... (page ' + (pagesProcessed + 1) + ')');
       }
     } while (nextCursor && pagesProcessed < maxPages);
 
     console.log(`Pagination complete. Total new tweets: ${allTweets.length}`);
+
+    // Classify tweets based on API metadata
+    function classifyTweet(tweet: TwitterApiTweet): { isRetweet: boolean; isQuote: boolean; isReply: boolean } {
+      const isReply = !!tweet.in_reply_to_status_id;  // Has a reply-to ID
+      const isRetweet = !!tweet.retweeted_status;     // Is a retweet
+      const isQuote = !!tweet.is_quote_status && !isRetweet;  // Is a quote (but not a retweet)
+      
+      return { isReply, isRetweet, isQuote };
+    }
 
     const tweets = allTweets;
 
@@ -190,19 +244,25 @@ export async function GET() {
     }
 
     const operations: AnyBulkWriteOperation<TweetDocument>[] =
-      tweets.map((tweet: TwitterApiTweet) => ({
-        updateOne: {
-          filter: { _id: tweet.id } as unknown as { _id: string },
-          update: {
-            $set: {
-              _id: tweet.id,
-              text: tweet.text,
-              created_at: new Date(tweet.createdAt),
+      tweets.map((tweet: TwitterApiTweet) => {
+        const classification = classifyTweet(tweet);
+        return {
+          updateOne: {
+            filter: { _id: tweet.id } as unknown as { _id: string },
+            update: {
+              $set: {
+                _id: tweet.id,
+                text: tweet.text,
+                created_at: new Date(tweet.createdAt),
+                isRetweet: classification.isRetweet,
+                isQuote: classification.isQuote,
+                isReply: classification.isReply,
+              },
             },
+            upsert: true,
           },
-          upsert: true,
-        },
-      }));
+        };
+      });
 
     let result = { upsertedCount: 0, modifiedCount: 0 };
 

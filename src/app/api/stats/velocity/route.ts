@@ -7,13 +7,14 @@ export async function GET() {
     const collection = await getTweetsCollection();
     const now = new Date();
 
-    // Helper to get tweets in last N days
+    // Helper to get tweets in last N days (excluding replies)
     const getTweetsInDays = async (days: number) => {
       const startDate = new Date(now);
       startDate.setUTCDate(startDate.getUTCDate() - days);
       return await collection
         .find({
           created_at: { $gte: startDate },
+          isReply: { $ne: true }, // Exclude replies
         })
         .toArray();
     };
@@ -23,6 +24,7 @@ export async function GET() {
     const todayTweets = await collection
       .find({
         created_at: { $gte: todayStart },
+        isReply: { $ne: true }, // Exclude replies
       })
       .toArray();
 

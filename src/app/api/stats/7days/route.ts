@@ -9,7 +9,7 @@ export async function GET() {
     const now = new Date();
     const days: DayStats[] = [];
     
-    // Get last 7 days including today
+    // Get last 7 days including today (excluding replies)
     for (let i = 6; i >= 0; i--) {
       const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i));
       const nextDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i + 1));
@@ -19,6 +19,7 @@ export async function GET() {
           $gte: date,
           $lt: nextDate,
         },
+        isReply: { $ne: true }, // Exclude replies
       });
       
       days.push({

@@ -10,13 +10,14 @@ export async function GET() {
     const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
 
-    // Get tweets from today
+    // Get tweets from today (excluding replies)
     const todaysTweets = await collection
       .find({
         created_at: {
           $gte: startOfDay,
           $lt: endOfDay,
         },
+        isReply: { $ne: true }, // Exclude replies
       })
       .sort({ created_at: 1 })
       .toArray();

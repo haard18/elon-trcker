@@ -26,9 +26,14 @@ export async function GET() {
       average: 0,
     }));
 
-    // Aggregate tweets by weekday
+    // Aggregate tweets by weekday (excluding replies)
     const results = await collection
       .aggregate([
+        {
+          $match: {
+            isReply: { $ne: true }, // Exclude replies
+          },
+        },
         {
           $group: {
             _id: {

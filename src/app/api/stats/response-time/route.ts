@@ -6,9 +6,11 @@ export async function GET() {
   try {
     const collection = await getTweetsCollection();
 
-    // Get all tweets sorted by date
+    // Get all tweets sorted by date (excluding replies)
     const allTweets = await collection
-      .find({})
+      .find({
+        isReply: { $ne: true }, // Exclude replies
+      })
       .sort({ created_at: 1 })
       .toArray();
 

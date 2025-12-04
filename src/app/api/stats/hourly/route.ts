@@ -24,9 +24,14 @@ export async function GET() {
       count: 0,
     }));
 
-    // Aggregate tweets by hour
+    // Aggregate tweets by hour (excluding replies)
     const results = await collection
       .aggregate([
+        {
+          $match: {
+            isReply: { $ne: true }, // Exclude replies
+          },
+        },
         {
           $group: {
             _id: {

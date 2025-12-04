@@ -6,8 +6,8 @@ export async function GET() {
   try {
     const collection = await getTweetsCollection();
 
-    // Get all tweets
-    const allTweets = await collection.find({}).toArray();
+    // Get all tweets (excluding replies)
+    const allTweets = await collection.find({ isReply: { $ne: true } }).toArray();
     const totalTweets = allTweets.length;
 
     if (totalTweets === 0) {

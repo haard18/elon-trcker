@@ -16,6 +16,7 @@ export async function GET() {
     let totalTweets = 0;
     let zeroTweetDays = 0;
     
+    // Count only non-reply tweets for this month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day));
       const nextDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day + 1));
@@ -25,6 +26,7 @@ export async function GET() {
           $gte: date,
           $lt: nextDate,
         },
+        isReply: { $ne: true }, // Exclude replies
       });
       
       tweetsPerDay.push({

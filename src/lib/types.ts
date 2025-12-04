@@ -2,12 +2,20 @@ export interface Tweet {
   _id: string;
   text: string;
   created_at: Date;
+  // Tweet type metadata (only these three types are counted)
+  isRetweet?: boolean;        // Repost of another tweet
+  isQuote?: boolean;           // Quote post (includes comment on another tweet)
+  isReply?: boolean;           // Reply to another tweet (EXCLUDED from count)
 }
 
 export interface TwitterApiTweet {
   id: string;
   text: string;
   createdAt: string;
+  // Metadata from Twitter API
+  in_reply_to_status_id?: string | null;
+  retweeted_status?: Record<string, unknown>;
+  is_quote_status?: boolean;
 }
 
 export interface TwitterApiResponse {

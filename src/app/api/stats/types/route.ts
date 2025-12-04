@@ -29,25 +29,30 @@ export interface TweetTypesResponse {
 }
 
 /**
- * Classify tweet based on text content
- * Since we only have text field, we use text patterns to classify
+ * Classify tweet based on API metadata
+ * For this market: count only main posts (not replies), quote posts, and reposts
  */
-function classifyTweet(text: string): {
+function classifyTweet(tweet: any): {
   isReply: boolean;
   isRetweet: boolean;
   isQuote: boolean;
   hasMedia: boolean;
+  isCounted: boolean; // true if it's a main post, quote, or repost
 } {
-  const isReply = /^@\w+/.test(text); // Starts with @mention
-  const isRetweet = /^RT @\w+/.test(text); // Starts with RT @
-  const isQuote = /https:\/\/t\.co\/\w+/g.test(text); // Contains shortened URL (quote/link)
-  const hasMedia = /pic\.twitter\.com|youtu\.be|imgur\.com|giphy\.com|vimeo\.com|vine\.co|twitpic\.com|imgur\.com/i.test(text);
+  const isReply = !!tweet.isReply;  // Uses metadata from API
+  const isRetweet = !!tweet.isRetweet;  // Uses metadata from API
+  const isQuote = !!tweet.isQuote;  // Uses metadata from API
+  const hasMedia = /pic\.twitter\.com|youtu\.be|imgur\.com|giphy\.com|vimeo\.com|vine\.co|twitpic\.com|imgur\.com/i.test(tweet.text);
+
+  // For this market: only count main posts (not replies), quotes, and reposts
+  const isCounted = !isReply && (isRetweet || isQuote || (!isRetweet && !isQuote));
 
   return {
     isReply,
     isRetweet,
     isQuote,
     hasMedia,
+    isCounted,
   };
 }
 
@@ -64,47 +69,49 @@ export async function GET() {
       quotes: 0,
       retweets: 0,
       media: 0,
-      total: tweets.length,
+      total: 0, // Only count tweets that should be counted (main posts, quotes, reposts)
     };
 
     // Classify tweets
     tweets.forEach((tweet: any) => {
-      const classification = classifyTweet(tweet.text);
+      const classification = classifyTweet(tweet);
 
-      // A tweet can have multiple classifications
-      // Priority: retweet > reply > quote > text/media
-      if (classification.isRetweet) {
-        stats.retweets++;
-      } else if (classification.isReply) {
-        stats.replies++;
-      } else if (classification.isQuote) {
-        stats.quotes++;
-      } else if (classification.hasMedia) {
-        stats.media++;
-      } else {
-        stats.text++;
+      // Count only tweets that are in scope: main posts (not replies), quotes, and reposts
+      if (classification.isCounted) {
+        stats.total++;
+
+        // Priority: retweet > quote > media > text
+        if (classification.isRetweet) {
+          stats.retweets++;
+        } else if (classification.isQuote) {
+          stats.quotes++;
+        } else if (classification.hasMedia) {
+          stats.media++;
+        } else {
+          stats.text++;
+        }
       }
+      // Replies are NOT counted and NOT included in breakdown
     });
 
-    // Calculate percentages
+    // Calculate percentages - based on counted tweets only
     const total = stats.total || 1; // Avoid division by zero
 
     const percentages: TweetTypePercentages = {
       textPct: Math.round((stats.text / total) * 10000) / 100,
-      repliesPct: Math.round((stats.replies / total) * 10000) / 100,
+      repliesPct: 0, // Replies not counted
       quotesPct: Math.round((stats.quotes / total) * 10000) / 100,
       retweetsPct: Math.round((stats.retweets / total) * 10000) / 100,
       mediaPct: Math.round((stats.media / total) * 10000) / 100,
     };
 
-    // Create breakdown array
+    // Create breakdown array - only show counted types
     const breakdown = [
       { type: 'Plain Text', count: stats.text, percentage: percentages.textPct },
-      { type: 'Replies', count: stats.replies, percentage: percentages.repliesPct },
       { type: 'Quotes', count: stats.quotes, percentage: percentages.quotesPct },
       { type: 'Retweets', count: stats.retweets, percentage: percentages.retweetsPct },
       { type: 'Media', count: stats.media, percentage: percentages.mediaPct },
-    ].sort((a, b) => b.count - a.count);
+    ].filter(item => item.count > 0).sort((a, b) => b.count - a.count);
 
     return NextResponse.json({
       counts: stats,

@@ -37,5 +37,15 @@ export async function getTweetsCollection() {
   const db = await getDatabase();
   return db.collection('tweets');
 }
+export async function deleteAllTweets() {
+  const collection = await getTweetsCollection();
+  return collection.deleteMany({});
+  
+}
+export async function deletePollState() {
+  const db = await getDatabase();
+  const pollStateCollection = db.collection('poll_state');
+  return pollStateCollection.deleteMany({});
+}
 
 export default clientPromise;
