@@ -145,9 +145,7 @@ export default function VelocityMetrics({ data }: VelocityMetricsProps) {
                 </div>
               </div>
             </div>
-            <div className="ml-2 text-2xl">
-              {getTrendIcon(data.sevenDays.trend)}
-            </div>
+ 
           </div>
           {data.sevenDays.trendPercentage > 0 && (
             <div className="mt-3 border-t-2 border-gray-200 pt-3 text-xs font-bold text-gray-600">

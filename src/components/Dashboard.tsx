@@ -361,55 +361,52 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Pattern Analysis Row - Collapsible */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Weekday Distribution */}
-            {weekdayStats && (
-              <div className="border-2 border-black bg-white">
-                <button
-                  onClick={() => toggleSection('weekday')}
-                  className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
-                >
-                  <h3 className="text-lg font-black text-black uppercase">Day-of-Week</h3>
-                  <span className={`text-2xl font-black transition-transform ${expandedSections.has('weekday') ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
-                {expandedSections.has('weekday') && (
-                  <div className="border-t-2 border-black px-6 py-4">
-                    <WeekdayDistribution
-                      data={weekdayStats.weekSummary}
-                      topDay={weekdayStats.topDay}
-                      topDayName={weekdayStats.topDayName}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Weekday Distribution - Collapsible */}
+          {weekdayStats && (
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('weekday')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Day-of-Week Distribution</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('weekday') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('weekday') && (
+                <div className="border-t-2 border-black px-6 py-4">
+                  <WeekdayDistribution
+                    data={weekdayStats.weekSummary}
+                    topDay={weekdayStats.topDay}
+                    topDayName={weekdayStats.topDayName}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
-            {/* Tweet Type Breakdown */}
-            {typeStats && (
-              <div className="border-2 border-black bg-white">
-                <button
-                  onClick={() => toggleSection('types')}
-                  className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
-                >
-                  <h3 className="text-lg font-black text-black uppercase">Tweet Types</h3>
-                  <span className={`text-2xl font-black transition-transform ${expandedSections.has('types') ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
-                {expandedSections.has('types') && (
-                  <div className="border-t-2 border-black px-6 py-4">
-                    <TypeBreakdown
-                      breakdown={typeStats.breakdown}
-                      counts={typeStats.counts}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Tweet Type Breakdown - Collapsible */}
+          {typeStats && (
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('types')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Tweet Type Breakdown</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('types') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('types') && (
+                <div className="border-t-2 border-black px-6 py-4">
+                  <TypeBreakdown
+                    breakdown={typeStats.breakdown}
+                    counts={typeStats.counts}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
