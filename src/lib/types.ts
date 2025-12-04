@@ -118,3 +118,34 @@ export interface VelocityResponse {
   sevenDays: VelocityMetric;
   thirtyDays: VelocityMetric;
 }
+
+export interface ResponseTimeMetric {
+  averageMinutesBetweenTweets: number;
+  medianMinutesBetweenTweets: number;
+  minMinutesBetweenTweets: number;
+  maxMinutesBetweenTweets: number;
+  responsiveness: 'very_slow' | 'slow' | 'moderate' | 'fast' | 'very_fast';
+}
+
+export interface ResponseTimeResponse extends ResponseTimeMetric {
+  totalTweets: number;
+  periodAnalyzed: string;
+}
+
+export interface BurstData {
+  startTime: string;
+  endTime: string;
+  tweetCount: number;
+  durationMinutes: number;
+  tweetsPerMinute: number;
+}
+
+export interface BurstDetectionResponse {
+  totalBursts: number;
+  averageTweetsPerBurst: number;
+  averageBurstDuration: number;
+  longestBurst: BurstData | null;
+  recentBursts: BurstData[];
+  burstsPerWeek: number;
+  quietPeriodsPerWeek: number;
+}

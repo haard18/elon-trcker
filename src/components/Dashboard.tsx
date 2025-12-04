@@ -9,6 +9,8 @@ import WeekdayDistribution from '@/components/WeekdayDistribution';
 import TypeBreakdown from '@/components/TypeBreakdown';
 import EngagementMetrics from '@/components/EngagementMetrics';
 import VelocityMetrics from '@/components/VelocityMetrics';
+import ResponseTimeMetrics from '@/components/ResponseTimeMetrics';
+import BurstMetrics from '@/components/BurstMetrics';
 import {
   DayStats,
   TodayStats,
@@ -18,6 +20,8 @@ import {
   TweetTypesResponse,
   EngagementMetricsResponse,
   VelocityResponse,
+  ResponseTimeResponse,
+  BurstDetectionResponse,
 } from '@/lib/types';
 
 interface MonthStatsResponse extends MonthStats {
@@ -37,47 +41,64 @@ export default function Dashboard() {
   const [typeStats, setTypeStats] = useState<TweetTypesResponse | null>(null);
   const [engagementStats, setEngagementStats] = useState<EngagementMetricsResponse | null>(null);
   const [velocityStats, setVelocityStats] = useState<VelocityResponse | null>(null);
+  const [responseTimeStats, setResponseTimeStats] = useState<ResponseTimeResponse | null>(null);
+  const [burstStats, setBurstStats] = useState<BurstDetectionResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['engagement', 'velocity']));
 
   const fetchStats = useCallback(async () => {
     try {
-      const [todayRes, weekRes, monthRes, hourlyRes, weekdayRes, typeRes, engagementRes, velocityRes] = await Promise.all([
+      // Fetch critical metrics first (blocks loading screen)
+      const [todayRes, weekRes, monthRes] = await Promise.all([
         fetch('/api/stats/today'),
         fetch('/api/stats/7days'),
         fetch('/api/stats/month'),
-        fetch('/api/stats/hourly'),
-        fetch('/api/stats/weekday'),
-        fetch('/api/stats/types'),
-        fetch('/api/stats/engagement'),
-        fetch('/api/stats/velocity'),
       ]);
 
-      const [today, week, month, hourly, weekday, type, engagement, velocity] = await Promise.all([
+      const [today, week, month] = await Promise.all([
         todayRes.json(),
         weekRes.json(),
         monthRes.json(),
-        hourlyRes.json(),
-        weekdayRes.json(),
-        typeRes.json(),
-        engagementRes.json(),
-        velocityRes.json(),
       ]);
 
       setTodayStats(today);
       setWeekStats(week);
       setMonthStats(month);
+      setLoading(false);
+      setLastUpdate(new Date());
+
+      // Fetch advanced analytics in background (non-blocking)
+      const [hourlyRes, weekdayRes, typeRes, engagementRes, velocityRes, responseTimeRes, burstsRes] = await Promise.all([
+        fetch('/api/stats/hourly'),
+        fetch('/api/stats/weekday'),
+        fetch('/api/stats/types'),
+        fetch('/api/stats/engagement'),
+        fetch('/api/stats/velocity'),
+        fetch('/api/stats/response-time'),
+        fetch('/api/stats/bursts'),
+      ]);
+
+      const [hourly, weekday, type, engagement, velocity, responseTime, bursts] = await Promise.all([
+        hourlyRes.json(),
+        weekdayRes.json(),
+        typeRes.json(),
+        engagementRes.json(),
+        velocityRes.json(),
+        responseTimeRes.json(),
+        burstsRes.json(),
+      ]);
+
       setHourlyStats(hourly);
       setWeekdayStats(weekday);
       setTypeStats(type);
       setEngagementStats(engagement);
       setVelocityStats(velocity);
-      setLastUpdate(new Date());
+      setResponseTimeStats(responseTime);
+      setBurstStats(bursts);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -93,6 +114,16 @@ export default function Dashboard() {
     } finally {
       setPolling(false);
     }
+  };
+
+  const toggleSection = (section: string) => {
+    const newSections = new Set(expandedSections);
+    if (newSections.has(section)) {
+      newSections.delete(section);
+    } else {
+      newSections.add(section);
+    }
+    setExpandedSections(newSections);
   };
 
   useEffect(() => {
@@ -218,60 +249,165 @@ export default function Dashboard() {
       <section className="mb-12">
         <h2 className="mb-6 text-2xl font-black text-white uppercase tracking-tight">Advanced Analytics</h2>
         <div className="space-y-6">
-          {/* Engagement Metrics */}
+          {/* Engagement Metrics - Collapsible */}
           {engagementStats && (
-            <Card title="Engagement & Consistency Metrics">
-              <EngagementMetrics data={engagementStats} />
-            </Card>
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('engagement')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Engagement & Consistency</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('engagement') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('engagement') && (
+                <div className="border-t-2 border-black px-6 py-4">
+                  <EngagementMetrics data={engagementStats} />
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Velocity/Momentum */}
+          {/* Velocity/Momentum - Collapsible */}
           {velocityStats && (
-            <Card title="Posting Velocity & Trends">
-              <VelocityMetrics data={velocityStats} />
-            </Card>
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('velocity')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Posting Velocity & Trends</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('velocity') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('velocity') && (
+                <div className="border-t-2 border-black px-6 py-4">
+                  <VelocityMetrics data={velocityStats} />
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Hourly Heatmap */}
+          {/* Response Time Analysis - Collapsible */}
+          {responseTimeStats && (
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('response-time')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Response Time Analysis</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('response-time') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('response-time') && (
+                <div className="border-t-2 border-black px-6 py-4">
+                  <ResponseTimeMetrics data={responseTimeStats} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Burst Detection - Collapsible */}
+          {burstStats && (
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('bursts')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Burst Detection & Patterns</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('bursts') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('bursts') && (
+                <div className="border-t-2 border-black px-6 py-4">
+                  <BurstMetrics data={burstStats} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Hourly Heatmap - Collapsible */}
           {hourlyStats && (
-            <Card title="Time-of-Day Heatmap (24H)">
-              <HourlyHeatmap
-                data={hourlyStats.hourly}
-                maxCount={hourlyStats.maxCount}
-                peakHours={hourlyStats.peakHours}
-              />
-              <div className="mt-4 border-t-2 border-black pt-4 text-sm">
-                <p className="text-gray-700 font-semibold">
-                  <span className="font-black text-black">Peak Hours:</span> {hourlyStats.peakHours.length > 0 ? hourlyStats.peakHours.map((h) => `${String(h).padStart(2, '0')}:00`).join(', ') : 'None'}
-                </p>
-                <p className="text-gray-700 font-semibold">
-                  <span className="font-black text-black">Silent Hours:</span> {hourlyStats.silentHours.length > 0 ? hourlyStats.silentHours.map((h) => `${String(h).padStart(2, '0')}:00`).join(', ') : 'None'}
-                </p>
-              </div>
-            </Card>
+            <div className="border-2 border-black bg-white">
+              <button
+                onClick={() => toggleSection('heatmap')}
+                className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+              >
+                <h3 className="text-lg font-black text-black uppercase">Time-of-Day Heatmap (24H)</h3>
+                <span className={`text-2xl font-black transition-transform ${expandedSections.has('heatmap') ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              {expandedSections.has('heatmap') && (
+                <div className="border-t-2 border-black px-6 py-4 space-y-4">
+                  <HourlyHeatmap
+                    data={hourlyStats.hourly}
+                    maxCount={hourlyStats.maxCount}
+                    peakHours={hourlyStats.peakHours}
+                  />
+                  <div className="border-t-2 border-black pt-4 text-sm">
+                    <p className="text-gray-700 font-semibold">
+                      <span className="font-black text-black">Peak Hours:</span> {hourlyStats.peakHours.length > 0 ? hourlyStats.peakHours.map((h) => `${String(h).padStart(2, '0')}:00`).join(', ') : 'None'}
+                    </p>
+                    <p className="text-gray-700 font-semibold">
+                      <span className="font-black text-black">Silent Hours:</span> {hourlyStats.silentHours.length > 0 ? hourlyStats.silentHours.map((h) => `${String(h).padStart(2, '0')}:00`).join(', ') : 'None'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
-          {/* Pattern Analysis Row */}
+          {/* Pattern Analysis Row - Collapsible */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Weekday Distribution */}
             {weekdayStats && (
-              <Card title="Day-of-Week Distribution">
-                <WeekdayDistribution
-                  data={weekdayStats.weekSummary}
-                  topDay={weekdayStats.topDay}
-                  topDayName={weekdayStats.topDayName}
-                />
-              </Card>
+              <div className="border-2 border-black bg-white">
+                <button
+                  onClick={() => toggleSection('weekday')}
+                  className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+                >
+                  <h3 className="text-lg font-black text-black uppercase">Day-of-Week</h3>
+                  <span className={`text-2xl font-black transition-transform ${expandedSections.has('weekday') ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+                {expandedSections.has('weekday') && (
+                  <div className="border-t-2 border-black px-6 py-4">
+                    <WeekdayDistribution
+                      data={weekdayStats.weekSummary}
+                      topDay={weekdayStats.topDay}
+                      topDayName={weekdayStats.topDayName}
+                    />
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Tweet Type Breakdown */}
             {typeStats && (
-              <Card title="Tweet Type Breakdown">
-                <TypeBreakdown
-                  breakdown={typeStats.breakdown}
-                  counts={typeStats.counts}
-                />
-              </Card>
+              <div className="border-2 border-black bg-white">
+                <button
+                  onClick={() => toggleSection('types')}
+                  className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-100 transition-colors"
+                >
+                  <h3 className="text-lg font-black text-black uppercase">Tweet Types</h3>
+                  <span className={`text-2xl font-black transition-transform ${expandedSections.has('types') ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+                {expandedSections.has('types') && (
+                  <div className="border-t-2 border-black px-6 py-4">
+                    <TypeBreakdown
+                      breakdown={typeStats.breakdown}
+                      counts={typeStats.counts}
+                    />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
