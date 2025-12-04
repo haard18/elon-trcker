@@ -75,33 +75,33 @@ export default function EngagementMetrics({ data }: EngagementMetricsProps) {
           </motion.div>
         </motion.div>
 
-        {/* Total Tweets */}
+        {/* Median Tweets Per Day */}
         <motion.div
           className="border-2 border-black bg-white p-4"
           variants={itemVariants}
           whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
         >
-          <div className="text-xs font-bold uppercase text-gray-600">Total Tweets</div>
+          <div className="text-xs font-bold uppercase text-gray-600">Median Tweets/Day</div>
           <motion.div
             className="mt-2 text-3xl font-black text-black"
             variants={numberVariants}
           >
-            {data.totalTweetsAllTime}
+            {data.medianTweetsPerDay}
           </motion.div>
         </motion.div>
 
-        {/* Days with Tweets */}
+        {/* Standard Deviation */}
         <motion.div
           className="border-2 border-black bg-white p-4"
           variants={itemVariants}
           whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
         >
-          <div className="text-xs font-bold uppercase text-gray-600">Active Days</div>
+          <div className="text-xs font-bold uppercase text-gray-600">Std Deviation</div>
           <motion.div
             className="mt-2 text-3xl font-black text-black"
             variants={numberVariants}
           >
-            {data.daysWithTweets}/{data.totalDaysTracked}
+            {data.standardDeviation}
           </motion.div>
         </motion.div>
 
@@ -134,8 +134,101 @@ export default function EngagementMetrics({ data }: EngagementMetricsProps) {
         </motion.div>
       </div>
 
+      {/* Distribution Stats Row */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        {/* Min Tweets */}
+        <motion.div
+          className="border-2 border-black bg-white p-4"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
+        >
+          <div className="text-xs font-bold uppercase text-gray-600">Min/Day</div>
+          <motion.div
+            className="mt-2 text-2xl font-black text-black"
+            variants={numberVariants}
+          >
+            {data.minTweetsPerDay}
+          </motion.div>
+        </motion.div>
+
+        {/* 25th Percentile */}
+        <motion.div
+          className="border-2 border-black bg-white p-4"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
+        >
+          <div className="text-xs font-bold uppercase text-gray-600">25th %ile</div>
+          <motion.div
+            className="mt-2 text-2xl font-black text-black"
+            variants={numberVariants}
+          >
+            {data.p25TweetsPerDay}
+          </motion.div>
+        </motion.div>
+
+        {/* Total Tweets */}
+        <motion.div
+          className="border-2 border-black bg-white p-4"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
+        >
+          <div className="text-xs font-bold uppercase text-gray-600">Total Tweets</div>
+          <motion.div
+            className="mt-2 text-2xl font-black text-black"
+            variants={numberVariants}
+          >
+            {data.totalTweetsAllTime}
+          </motion.div>
+        </motion.div>
+
+        {/* 75th Percentile */}
+        <motion.div
+          className="border-2 border-black bg-white p-4"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
+        >
+          <div className="text-xs font-bold uppercase text-gray-600">75th %ile</div>
+          <motion.div
+            className="mt-2 text-2xl font-black text-black"
+            variants={numberVariants}
+          >
+            {data.p75TweetsPerDay}
+          </motion.div>
+        </motion.div>
+
+        {/* Max Tweets */}
+        <motion.div
+          className="border-2 border-black bg-white p-4"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
+        >
+          <div className="text-xs font-bold uppercase text-gray-600">Max/Day</div>
+          <motion.div
+            className="mt-2 text-2xl font-black text-black"
+            variants={numberVariants}
+          >
+            {data.maxTweetsPerDay}
+          </motion.div>
+        </motion.div>
+      </div>
+
       {/* Bottom Row - Pattern Analysis */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {/* Days with Activity */}
+        <motion.div
+          className="border-2 border-black bg-white p-4"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
+        >
+          <div className="text-xs font-bold uppercase text-gray-600">Active Days</div>
+          <motion.div
+            className="mt-3 text-2xl font-black text-black"
+            variants={numberVariants}
+          >
+            {data.daysWithTweets}/{data.totalDaysTracked}
+          </motion.div>
+        </motion.div>
+
         {/* Most Active Day */}
         <motion.div
           className="border-2 border-black bg-white p-4"
@@ -165,24 +258,24 @@ export default function EngagementMetrics({ data }: EngagementMetricsProps) {
             {data.mostActiveHour}
           </motion.div>
         </motion.div>
-
-        {/* Tweeting Frequency */}
-        <motion.div
-          className="border-2 border-black bg-white p-4"
-          variants={itemVariants}
-          whileHover={{ scale: 1.05, boxShadow: '8px 8px 0 #000' }}
-        >
-          <div className="text-xs font-bold uppercase text-gray-600">Frequency</div>
-          <motion.div
-            className={`mt-3 inline-block rounded px-3 py-2 text-xs font-black uppercase ${frequencyColors[data.tweetingFrequency]}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            {frequencyLabels[data.tweetingFrequency]}
-          </motion.div>
-        </motion.div>
       </div>
+
+      {/* Tweeting Frequency */}
+      <motion.div
+        className="border-2 border-black bg-white p-4"
+        variants={itemVariants}
+        whileHover={{ scale: 1.02, boxShadow: '8px 8px 0 #000' }}
+      >
+        <div className="text-xs font-bold uppercase text-gray-600">Tweeting Frequency</div>
+        <motion.div
+          className={`mt-3 inline-block rounded px-4 py-3 text-sm font-black uppercase ${frequencyColors[data.tweetingFrequency]}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          {frequencyLabels[data.tweetingFrequency]}
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }

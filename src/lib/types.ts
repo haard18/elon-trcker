@@ -100,6 +100,12 @@ export interface TweetTypesResponse {
 
 export interface EngagementMetrics {
   averageTweetsPerDay: number;
+  medianTweetsPerDay: number;
+  standardDeviation: number;
+  minTweetsPerDay: number;
+  maxTweetsPerDay: number;
+  p25TweetsPerDay: number; // 25th percentile
+  p75TweetsPerDay: number; // 75th percentile
   totalTweetsAllTime: number;
   daysWithTweets: number;
   totalDaysTracked: number;
