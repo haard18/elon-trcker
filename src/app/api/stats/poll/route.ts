@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
 
+interface PollState {
+  _id: string;
+  lastPollTime?: Date;
+  lastTweetId?: string;
+}
+
 export async function GET() {
   try {
     const db = await getDatabase();
-    const pollStateCollection = db.collection('poll_state');
+    const pollStateCollection = db.collection<PollState>('poll_state');
     const pollState = await pollStateCollection.findOne({ _id: 'last_poll' });
 
     return NextResponse.json({
