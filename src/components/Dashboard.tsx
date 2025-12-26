@@ -144,31 +144,81 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
       {/* HEADER SECTION */}
-      <header className="mb-8 pb-6 border-b border-gray-200">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              Elon Musk Analytics
-            </h1>
-            <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
-              <span>Last refreshed: {lastUpdate ? lastUpdate.toLocaleTimeString() : '-'}</span>
-              <span className="text-sm text-gray-400">(server poll: {serverLastPoll ? new Date(serverLastPoll).toLocaleString() : '-'})</span>
-              <span className="inline-flex items-center gap-1">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                Auto-polling hourly
-              </span>
+<header className="mb-10 rounded-2xl bg-white/80 backdrop-blur border border-gray-200 shadow-sm">
+  <div className="px-6 py-6 md:px-8">
+    <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      
+      {/* Left */}
+      <div className="flex-1">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+          Elon Musk Analytics
+        </h1>
+
+        {/* Attribution */}
+        <div className="mt-2 flex items-center gap-3">
+          <a
+            href="https://x.com/adiflips"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-3"
+          >
+            <div className="relative w-9 h-9">
+              <img
+                src="image.png"
+                alt="Adiflips"
+                className="w-9 h-9 rounded-full ring-2 ring-white shadow-sm group-hover:scale-105 transition-transform"
+              />
+              <span className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-full ring-2 ring-white"></span>
             </div>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/feed"
-              className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              View Feed
-            </Link>
-          </div>
+
+            <span className="text-sm text-gray-600 italic group-hover:text-gray-800 transition-colors">
+              Turning chaotic tweets into actionable signals (yes, really).
+              <span className="ml-1 font-medium not-italic text-gray-900">
+                x.com/adiflips
+              </span>
+            </span>
+          </a>
         </div>
-      </header>
+
+        {/* Meta */}
+        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+          <span>
+            Last refreshed:
+            <span className="ml-1 font-medium text-gray-700">
+              {lastUpdate ? lastUpdate.toLocaleTimeString() : '-'}
+            </span>
+          </span>
+
+          <span className="text-gray-400">
+            Server poll:
+            <span className="ml-1">
+              {serverLastPoll ? new Date(serverLastPoll).toLocaleString() : '-'}
+            </span>
+          </span>
+
+          <span className="inline-flex items-center gap-2 font-medium text-gray-600">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500"></span>
+            </span>
+            Auto-polling hourly
+          </span>
+        </div>
+      </div>
+
+      {/* Right */}
+      <div className="flex gap-3">
+        <Link
+          href="/feed"
+          className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-700 border border-gray-300 bg-white hover:bg-gray-50 hover:shadow-sm transition-all"
+        >
+          View Feed
+        </Link>
+      </div>
+    </div>
+  </div>
+</header>
+
 
       {/* KEY METRICS SECTION */}
       <section className="mb-8">
