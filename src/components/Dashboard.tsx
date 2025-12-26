@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [burstStats, setBurstStats] = useState<BurstDetectionResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [serverLastPoll, setServerLastPoll] = useState<string | null>(null);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -95,6 +96,18 @@ export default function Dashboard() {
       setVelocityStats(velocity);
       setResponseTimeStats(responseTime);
       setBurstStats(bursts);
+
+      // Fetch server poll state (last poll time)
+      try {
+        const pollRes = await fetch('/api/stats/poll');
+        if (pollRes.ok) {
+          const pollJson = await pollRes.json();
+          if (pollJson.lastPollTime) setServerLastPoll(pollJson.lastPollTime);
+        }
+      } catch (err) {
+        // ignore poll state errors
+        console.debug('Failed to fetch poll state', err);
+      }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     }
@@ -138,7 +151,8 @@ export default function Dashboard() {
               Elon Musk Analytics
             </h1>
             <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
-              <span>Updated {lastUpdate ? lastUpdate.toLocaleTimeString() : '-'}</span>
+              <span>Last refreshed: {lastUpdate ? lastUpdate.toLocaleTimeString() : '-'}</span>
+              <span className="text-sm text-gray-400">(server poll: {serverLastPoll ? new Date(serverLastPoll).toLocaleString() : '-'})</span>
               <span className="inline-flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 Auto-polling hourly

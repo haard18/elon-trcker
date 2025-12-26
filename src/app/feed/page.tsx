@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Card from '@/components/Card';
 import { Tweet } from '@/lib/types';
 
 export default function FeedPage() {
@@ -54,78 +53,82 @@ export default function FeedPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="border-4 border-black bg-white p-8 shadow-[8px_8px_0_#000]">
-          <div className="text-2xl text-black uppercase">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-gray-900 border-r-transparent mb-4"></div>
+          <div className="text-sm text-gray-600">Loading tweets...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-4 md:p-8">
-      <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-4xl text-white uppercase tracking-tighter md:text-5xl">
-            LIVE FEED
-          </h1>
-          <p className="text-sm font-bold text-gray-600">
-            Last update: {lastUpdate ? lastUpdate.toLocaleTimeString() : '-'}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <button
-            onClick={() => fetchTweets(true)}
-            disabled={refreshing}
-            className="border-4 border-black bg-black px-6 py-3 text-black uppercase text-white shadow-[4px_4px_0_#666] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none disabled:opacity-50"
-          >
-            {refreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`border-4 border-black px-6 py-3 text-black uppercase shadow-[4px_4px_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${autoRefresh ? 'bg-black text-white' : 'bg-white text-black'}`}
-          >
-            Auto: {autoRefresh ? 'ON' : 'OFF'}
-          </button>
-          <Link
-            href="/"
-            className="border-4 border-black bg-white px-6 py-3 text-black uppercase shadow-[4px_4px_0_#000] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          >
-            ← Dashboard
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+      <header className="mb-8 pb-6 border-b border-gray-200">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">LIVE FEED</h1>
+            <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
+              <span>Last update: {lastUpdate ? lastUpdate.toLocaleTimeString() : '-'}</span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Auto-refresh {autoRefresh ? 'ON' : 'OFF'}
+              </span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => fetchTweets(true)}
+              disabled={refreshing}
+              className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`px-5 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ${autoRefresh ? 'bg-white text-gray-700' : 'bg-white text-gray-700'}`}
+            >
+              Auto: {autoRefresh ? 'ON' : 'OFF'}
+            </button>
+            <Link
+              href="/"
+              className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              ← Dashboard
+            </Link>
+          </div>
         </div>
       </header>
 
-      <Card title={`Recent Tweets (${tweets.length})`}>
-        <div className="space-y-4">
-          {tweets.length === 0 ? (
-            <div className="py-8 text-center font-black">
-              <p className="text-lg font-bold">No tweets yet</p>
-              <p className="text-sm">Click the Poll button on the dashboard to fetch tweets</p>
-            </div>
-          ) : (
-            tweets.map((tweet) => (
-              <div
-                key={tweet._id}
-                className="border-4 border-black p-4 transition-all hover:shadow-[4px_4px_0_#000]"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="font-mono text-xs text-black">
-                    {tweet._id}
-                  </span>
-                  <span className="border-2 border-black bg-gray-100 text-black px-2 py-1 text-xs font-bold">
-                    {formatRelativeTime(tweet.created_at.toString())}
-                  </span>
-                </div>
-                <p className="text-lg leading-relaxed text-black">{tweet.text}</p>
-                <div className="mt-2 text-xs text-black">
-                  {new Date(tweet.created_at).toLocaleString()}
-                </div>
+      <section className="mb-8">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="mb-4 border-b border-gray-100 pb-2">
+            <h2 className="text-base font-semibold text-gray-900">Recent Tweets ({tweets.length})</h2>
+          </div>
+
+          <div className="space-y-4">
+            {tweets.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-lg font-semibold text-gray-700">No tweets yet</p>
+                <p className="text-sm text-gray-500">Click the Poll button on the dashboard to fetch tweets</p>
               </div>
-            ))
-          )}
+            ) : (
+              tweets.map((tweet) => (
+                <div key={tweet._id} className="border-b border-gray-100 py-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="font-mono text-xs text-gray-500">{tweet._id}</span>
+                    <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
+                      {formatRelativeTime(tweet.created_at.toString())}
+                    </span>
+                  </div>
+                  <p className="text-gray-900 text-lg leading-relaxed">{tweet.text}</p>
+                  <div className="mt-2 text-xs text-gray-500">{new Date(tweet.created_at).toLocaleString()}</div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </Card>
+      </section>
     </div>
   );
 }
