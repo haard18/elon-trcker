@@ -1,89 +1,73 @@
-# Elon Tracker
+# Elon Musk Twitter Analytics
 
-A Next.js 14 dashboard that tracks Elon Musk's tweets using the TwitterIO API and stores them in MongoDB.
+A production-ready Next.js application that automatically tracks and analyzes Elon Musk's Twitter activity with hourly polling.
 
-## Features
+## ✨ Features
 
-- **Tweet Polling**: Fetches tweets from TwitterIO API and stores them in MongoDB
-- **Analytics Dashboard**: View tweet statistics for today, last 7 days, and the current month
-- **Live Feed**: Browse recent tweets with relative timestamps
-- **Auto-refresh**: Dashboard updates every 30 seconds
-- **Neubrutalist Design**: Clean black and white robotic styling
+- **Automatic Hourly Polling**: Fetches new tweets every hour via cron job
+- **Minimalistic UI**: Clean, modern dashboard with collapsible analytics sections  
+- **Real-time Analytics**: Daily, weekly, monthly stats with advanced metrics
+- **Production Ready**: Environment validation, error handling, health checks
 
-## Tech Stack
+## 🚀 Quick Start
 
-- **Next.js 14** (App Router)
-- **TypeScript**
-- **MongoDB**
-- **TailwindCSS**
-- **Recharts** (for bar charts)
+1. **Clone and install**:
+   ```bash
+   npm install
+   ```
 
-## Getting Started
+2. **Configure environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
 
-### 1. Install Dependencies
+3. **Run locally**:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm install
-```
+Visit [http://localhost:3000](http://localhost:3000)
 
-### 2. Configure Environment Variables
+## 📦 Deployment
 
-Copy the example environment file and fill in your credentials:
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed production deployment instructions.
 
-```bash
-cp .env.local.example .env.local
-```
-
-Update `.env.local` with your values:
-
-```env
-MONGODB_URI="mongodb+srv://your-username:your-password@your-cluster.mongodb.net/?retryWrites=true&w=majority"
-TWITTERIO_BASE="https://api.twitterapi.io/twitter/user/last_tweets"
-TWITTERIO_API_KEY="your-twitterio-api-key"
-POLL_LIMIT=50
-```
-
-### 3. Run Development Server
+### Quick Deploy to Vercel
 
 ```bash
-npm run dev
+vercel
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The app includes automatic hourly polling via Vercel Cron. Just add your environment variables in the Vercel dashboard.
 
-## API Routes
+## 🔧 Environment Variables
 
-| Route | Description |
-|-------|-------------|
-| `GET /api/poll` | Fetches tweets from TwitterIO and upserts into MongoDB |
-| `GET /api/stats/today` | Returns today's tweet count, first and last tweet times |
-| `GET /api/stats/7days` | Returns tweet counts for the last 7 days |
-| `GET /api/stats/month` | Returns monthly statistics (total, average, zero days) |
-| `GET /api/tweets/recent` | Returns the last 50 tweets sorted by date |
+Required variables (see `.env.example`):
+- `MONGODB_URI` - MongoDB connection string
+- `TWITTERIO_API_KEY` - Twitter API key
+- `TWITTERIO_USERNAME` - Twitter username to track (default: elonmusk)
+- `CRON_SECRET` - Secure random string for cron authentication
 
-## Pages
+## 📚 Documentation
 
-- **`/`** - Main dashboard with analytics cards and monthly breakdown
-- **`/feed`** - Live feed of recent tweets
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Production deployment guide
+- [POLLING.md](POLLING.md) - Polling mechanism details
 
-## MongoDB Schema
+## 🛠️ Tech Stack
 
-The `tweets` collection uses the following schema:
+- Next.js 16 with App Router
+- React 19
+- MongoDB
+- Tailwind CSS
+- TypeScript
+- Recharts
 
-```typescript
-{
-  _id: string,      // Tweet ID from Twitter
-  text: string,     // Tweet content
-  created_at: Date  // When the tweet was posted
-}
-```
+## 📊 API Endpoints
 
-## Usage
-
-1. Click **"Poll Now"** on the dashboard to fetch the latest tweets
-2. View analytics in the dashboard cards
-3. Navigate to **Feed** to see individual tweets
-4. Enable **Auto-refresh** on the feed page for live updates
+- `/api/stats/*` - Various analytics endpoints
+- `/api/cron/poll` - Hourly cron trigger (secured)
+- `/api/health` - Health check endpoint
 
 ## License
 

@@ -15,37 +15,37 @@ export default function WeekChart({ data }: WeekChartProps) {
   }));
 
   return (
-    <div className="h-48 w-full">
+    <div className="h-32 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <BarChart data={formattedData} margin={{ top: 5, right: 0, left: -30, bottom: 0 }}>
           <XAxis 
             dataKey="label" 
             axisLine={false} 
             tickLine={false}
-            tick={{ fill: '#000', fontSize: 12, fontWeight: 'bold' }}
+            tick={{ fill: '#6b7280', fontSize: 11 }}
           />
           <YAxis 
             axisLine={false} 
             tickLine={false}
-            tick={{ fill: '#000', fontSize: 12 }}
+            tick={{ fill: '#6b7280', fontSize: 11 }}
             allowDecimals={false}
           />
           <Tooltip
             contentStyle={{
               background: '#fff',
-              border: '3px solid #000',
-              borderRadius: 0,
-              boxShadow: '4px 4px 0 #000',
+              border: '1px solid #e5e7eb',
+              borderRadius: '0.5rem',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
             }}
-            labelStyle={{ fontWeight: 'bold', color: '#000' }}
+            labelStyle={{ fontWeight: '600', color: '#111827' }}
             formatter={(value: number) => [value, 'Tweets']}
             labelFormatter={(label) => label}
           />
-          <Bar dataKey="count" radius={0}>
+          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
             {formattedData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
-                fill={index === formattedData.length - 1 ? '#000' : '#666'}
+                fill={index === formattedData.length - 1 ? '#3b82f6' : '#93c5fd'}
               />
             ))}
           </Bar>
